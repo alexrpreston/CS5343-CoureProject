@@ -12,24 +12,48 @@ class PCB:
 class processQueue:
     def __init__(self):
         self.queue = LinkedList()
-    def addPCB(self, PCB):
-        self.queue.insert(PCB)
-    def deletePCF(self, PID):
-        current = self.queue.head
-        previous = None
-        found = False
-        while current and found is False:
-            if current.getData().getProcessID() == PID:
-                found = True
-            else:
-                previous = current
-                current = current.getNext()
-        if current is None:
-            raise ValueError("PID not in list")
-        if previous is None:
-            self.head = current.getNext()
+    def addPCB(self, PCB, position=None):
+        if position is None:
+            self.queue.insert(PCB)
         else:
-            previous.setNext(current.getNext())
+            newNode = Node(PCB)
+            if position == 0:
+                temp = self.queue.head
+                newNode.setNext(temp)
+                self.queue.head = newNode
+            else:
+                i = 0
+                head = self.queue.head
+                while head.getNext():
+                    i += 1
+                    if i == position:
+                        temp = head
+                        newNode.setNext(temp.getNext())
+                        head.setNext(newNode)
+                        break
+                    head = head.getNext()
+                raise ValueError("Insertion position is beyond length of list")
+
+    def deletePCF(self, PID=None):
+        if PID is None:
+            self.queue.head = self.queue.head.getNext()
+        else:
+            current = self.queue.head
+            previous = None
+            found = False
+            while current and found is False:
+                if current.getData().getProcessID() == PID:
+                    found = True
+                else:
+                    previous = current
+                    current = current.getNext()
+            if current is None:
+                raise ValueError("PID not in list")
+            if previous is None:
+                print("Head is PID to delete")
+                self.queue.head = current.getNext()
+            else:
+                previous.setNext(current.getNext())
     
     def printProcessQueue(self):
         head = self.queue.head
@@ -107,36 +131,16 @@ class LinkedList(object):
             raise ValueError("Data not in list")
         return current
 
-    def delete(self, data):
-        current = self.head
-        previous = None
-        found = False
-        while current and found is False:
-            if current.getData() == data:
-                found = True
-            else:
-                previous = current
-                current = current.getNext()
-        if current is None:
-            raise ValueError("Data not in list")
-        if previous is None:
-            self.head = current.getNext()
-        else:
-            previous.setNext(current.getNext())
 
 
-readyQueue = processQueue()
-newPCB = PCB(8356, 1)
-readyQueue.addPCB(newPCB)
-newPCB = PCB(2346, 2)
-readyQueue.addPCB(newPCB)
-newPCB = PCB(1356, 2)
-readyQueue.addPCB(newPCB)
-newPCB = PCB(9776, 3)
-readyQueue.addPCB(newPCB)
-print("Ready Queue")
-readyQueue.printProcessQueue()
-readyQueue.deletePCF(1356)
-readyQueue.deletePCF(9776)
-print("\n\nReady Queue")
-readyQueue.printProcessQueue()
+# readyQueue = processQueue()
+# newPCB = PCB(8356, 1)
+# readyQueue.addPCB(newPCB)
+# newPCB = PCB(2346, 2)
+# readyQueue.addPCB(newPCB)
+# newPCB = PCB(1356, 2)
+# readyQueue.addPCB(newPCB)
+# newPCB = PCB(9776, 3)
+# readyQueue.addPCB(newPCB, 10)
+# print("Ready Queue")
+# readyQueue.printProcessQueue()
