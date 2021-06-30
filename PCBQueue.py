@@ -42,13 +42,13 @@ class processQueue:
             previous = None
             found = False
             while current and found is False:
-                if current.getData().getProcessID() == PID:
+                if int(current.getData().getProcessID()) == int(PID):
                     found = True
                 else:
                     previous = current
                     current = current.getNext()
             if current is None:
-                raise ValueError("PID not in list")
+                raise ValueError("PCB with PID not in list")
             if previous is None:
                 self.queue.head = current.getNext()
             else:
