@@ -1,10 +1,11 @@
-from PCBQueue import processQueue, PCB
+from PCBQueue import processQueue, PCB, schedulers
 import os
 
 class userInterface:
     def __init__(self):
         self.queue = processQueue()
         self.fh = fileHandler()
+        self.schedulers = schedulers()
         print("Welcome to the PCB Queue Simulator.")
 
     def printMainMenu(self):
@@ -13,16 +14,18 @@ class userInterface:
         print("2. Manually Input PCB's")
         print("3. Print proccess queue")
         print("4. Delete a PCB")
-        print("5. Exit")
+        print("5. Run Shortest Job First Scheduler")
+        print("6. Run Non-Preemptive Priority Scheduler")
+        print("7. Exit")
         print("========================")
         print("What would you like to do: ", end="")
         choice = int(input())
-        if choice == 5:
-            quit()
-        while choice > 4 or choice < 1:
+        while choice > 7 or choice < 1:
             print("Invalid Input")
             print("What would you like to do: ", end="")
             choice = int(input())
+        if choice == 7:
+            quit()
         if choice == 1:
             self.loadDataFromFile()
         elif choice == 2:
@@ -35,6 +38,12 @@ class userInterface:
             print("Please enter the PID of the PCB you want to delete.")
             print("If no PCB is entered the first one will be removed.")
             self.deletePCB()
+        elif choice == 5:
+            print("Average waiting time for Shortest Job First:", self.schedulers.shortestJobFirst(self.queue), "ms")
+            self.printMainMenu()
+        elif choice == 6:
+            print("Average waiting time for Non-Preemptive Priority:", self.schedulers.nonPreemptivePriorty(self.queue), "ms")
+            self.printMainMenu()
 
 
     def loadDataFromFile(self):
@@ -51,7 +60,7 @@ class userInterface:
         pcbData = self.fh.parseInputFile(fileName)
         for row in pcbData:
             PID, arrival_time, burst_time, priority = row
-            self.queue.addPCB(PCB(PID, priority))
+            self.queue.addPCB(PCB(PID,arrival_time, burst_time, priority))
         print(str(len(pcbData)) + " Process Control Blocks loaded and appended to the queue.")
         self.printMainMenu()
 
@@ -62,7 +71,7 @@ class userInterface:
             print("Error. We were expecting four arguements but recieved", len(inputs), "\nTry Again: ", end="")
             inputs = input().split(", ")
         PID, arrival_time, burst_time, priority = inputs
-        self.queue.addPCB(PCB(PID, priority))
+        self.queue.addPCB(PCB(PID, arrival_time, burst_time, priority))
         print("Would you like to add another PCB? (Y/N): ", end=" ")
         addAnotherPCB = input()
         if addAnotherPCB.lower() == "y" or addAnotherPCB.lower() == "yes":

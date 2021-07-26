@@ -1,6 +1,8 @@
 class PCB:
-    def __init__(self, proccessID, priorty):
+    def __init__(self, proccessID, arrivalTime, burstTime, priorty):
         self.processID = proccessID
+        self.arrivalTime = arrivalTime
+        self.burstTime = burstTime
         self.priorty = priorty
 
     def getProcessID(self):
@@ -9,9 +11,17 @@ class PCB:
     def getPriorty(self):
         return self.priorty
 
+    def getBurstTime(self):
+        return self.burstTime
+
+    def getArrivalTime(self):
+        return self.arrivalTime
+
 class processQueue:
     def __init__(self):
         self.queue = LinkedList()
+    def getHeadPCB(self):
+        return self.queue.head
     def addPCB(self, PCB, position=None):
         if position is None:
             self.queue.insert(PCB)
@@ -60,6 +70,8 @@ class processQueue:
         while head.getNext():
             print(("====================="))
             print("= PID: " + str(head.getData().getProcessID()))
+            print("= Arrival Time: " + str(head.getData().getArrivalTime()))
+            print("= Burst Time: " + str(head.getData().getBurstTime()))
             print("= Priority: " + str(head.getData().getPriorty()))
             print("=====================")
             print("        |")
@@ -69,10 +81,77 @@ class processQueue:
             if head.getNext() is None:
                 print(("====================="))
                 print("= PID: " + str(head.getData().getProcessID()))
+                print("= Arrival Time: " + str(head.getData().getArrivalTime()))
+                print("= Burst Time: " + str(head.getData().getBurstTime()))
                 print("= Priority: " + str(head.getData().getPriorty()))
                 print("=====================")
         print("\n\n\n")
 
+class schedulers():
+    def shortestJobFirst(self, proccessQueue):
+        def arrivalTime(elem):
+            return elem.getArrivalTime()
+        time = 0
+        waitingTime = []
+        sortedQueue = []
+        #sort processes according to arrival time
+        head = proccessQueue.queue.head
+        while head:
+            sortedQueue.append(head.getData())
+            head = head.getNext()
+        sortedQueue.sort(key=arrivalTime)
+        for pcb in sortedQueue:
+            print(pcb.getPriorty(),pcb.getBurstTime(), pcb.getArrivalTime())
+        #dequeue PCBs to calculate wait time for each process
+        time = sortedQueue[0].getArrivalTime()
+        while sortedQueue:
+            shortestBurstPCB = None
+            shortestBurstNum = float("inf")
+            for PCB in sortedQueue:
+                if PCB.getArrivalTime() <= time and PCB.getBurstTime() < shortestBurstNum:
+                    shortestBurstPCB = PCB
+                    shortestBurstNum = PCB.getBurstTime()
+            if time < shortestBurstPCB.getArrivalTime():
+                time += shortestBurstPCB.getArrivalTime()
+            waitingTime.append(time)
+            time += shortestBurstPCB.getBurstTime()
+            del sortedQueue[sortedQueue.index(shortestBurstPCB)]
+        return sum(waitingTime) / len(waitingTime)
+
+
+    def nonPreemptivePriorty(self, proccessQueue):
+        def arrivalTime(elem):
+            return elem.getArrivalTime()
+        time = 0
+        waitingTime = []
+        sortedQueue = []
+        #sort processes according to arrival time
+        head = proccessQueue.queue.head
+        while head:
+            sortedQueue.append(head.getData())
+            head = head.getNext()
+        sortedQueue.sort(key=arrivalTime)
+        #dequeue PCBs to calculate wait time for each process
+        for pcb in sortedQueue:
+            print(pcb.getPriorty(),pcb.getBurstTime(), pcb.getArrivalTime())
+        time = sortedQueue[0].getArrivalTime()
+        while sortedQueue:
+            highestPriortyPCB = None
+            highestPriortyNum = float("inf")
+            for PCB in sortedQueue:
+                if PCB.getArrivalTime() <= time and PCB.getPriorty() < highestPriortyNum:
+                    highestPriortyPCB = PCB
+                    highestPriortyNum = PCB.getPriorty()
+            if time < highestPriortyPCB.getArrivalTime():
+                time += highestPriortyPCB.getArrivalTime()
+            waitingTime.append(time)
+            time += highestPriortyPCB.getBurstTime()
+            del sortedQueue[sortedQueue.index(highestPriortyPCB)]
+            for pcb in sortedQueue:
+                print(pcb.getPriorty(), end = " ")
+            print()
+        print(waitingTime)
+        return sum(waitingTime) / len(waitingTime)
 
 class Node(object):
     def __init__(self, data=None, next=None):
